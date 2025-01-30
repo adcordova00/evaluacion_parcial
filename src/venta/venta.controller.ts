@@ -7,6 +7,33 @@ import { UpdateVentaDto } from './dto/update-venta.dto';
 export class VentaController {
   constructor(private readonly ventaService: VentaService) {}
 
+  //Endpoint Consultas avanzadas
+  @Get('/estadisticas/ventas-por-mes')
+  totalVentasPorMes() {
+    return this.ventaService.totalVentasPorMes();
+  }
+
+  @Get('/estadisticas/ventas-por-sede')
+  totalVentasPorSede() {
+    return this.ventaService.totalVentasPorSede();
+  }
+
+  @Get('/estadisticas/productos-mas-vendidos')
+  productosMasVendidos() {
+    return this.ventaService.productosMasVendidos();
+  }
+
+  @Get('/estadisticas/mejor-vendedor')
+  mejorVendedor() {
+    return this.ventaService.mejorVendedor();
+  }
+
+  @Get('/estadisticas/clientes-top')
+  clientesTop() {
+    return this.ventaService.clientesTop();
+  }
+
+  //Endpoints CRUD
   @Post()
   create(@Body() createVentaDto: CreateVentaDto) {
     return this.ventaService.create(createVentaDto);
