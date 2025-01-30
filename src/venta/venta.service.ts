@@ -27,6 +27,63 @@ export class VentaService {
     @InjectRepository(Sede)
     private readonly sedeRepository: Repository<Sede>,
   ) {}
+  //Consultas avanzadas para las ventas de la API Ventas
+  //Total de ventas en un mes
+  async totalVentasPorMes() {
+    return await this.ventaRepository
+      .createQueryBuilder('venta')
+      .select("TO_CHAR(venta.fechaVenta, 'YYYY-MM')", 'mes')
+      .addSelect('SUM(venta.total)', 'total_ventas')
+      .groupBy("TO_CHAR(venta.fechaVenta, 'YYYY-MM')")
+      .orderBy('mes', 'ASC')
+      .getRawMany();
+  }
+  //Total de ventas en una sede
+  async totalVentasPorSede() {
+    return await this.ventaRepository
+      .createQueryBuilder('venta')
+      .innerJoinAndSelect('venta.sede', 'sede')
+      .select('sede.nombre', 'sede')
+      .addSelect('SUM(venta.total)', 'total_ventas')
+      .groupBy('sede.id')
+      .orderBy('total_ventas', 'DESC')
+      .getRawMany();
+  }
+  //Producto mas vendido
+  async productosMasVendidos() {
+    return await this.ventaRepository
+      .createQueryBuilder('venta')
+      .innerJoinAndSelect('venta.producto', 'producto')
+      .select('producto.nombre', 'producto')
+      .addSelect('SUM(venta.cantidad)', 'cantidad_vendida')
+      .groupBy('producto.id')
+      .orderBy('cantidad_vendida', 'DESC')
+      .getRawMany();
+  }
+  //Mejor vendedor
+  async mejorVendedor() {
+    return await this.ventaRepository
+      .createQueryBuilder('venta')
+      .innerJoinAndSelect('venta.empleado', 'empleado')
+      .select('empleado.nombre', 'empleado')
+      .addSelect('SUM(venta.total)', 'total_ventas')
+      .groupBy('empleado.id')
+      .orderBy('total_ventas', 'DESC')
+      .limit(1) 
+      .getRawOne();
+  }
+  //Top 5 de mejores clientes
+  async clientesTop() {
+    return await this.ventaRepository
+      .createQueryBuilder('venta')
+      .innerJoinAndSelect('venta.cliente', 'cliente')
+      .select('cliente.nombre', 'cliente')
+      .addSelect('COUNT(venta.id)', 'cantidad_compras')
+      .groupBy('cliente.id')
+      .orderBy('cantidad_compras', 'DESC')
+      .limit(5) 
+      .getRawMany();
+  }
 
   async create(createVentaDto: CreateVentaDto): Promise<Venta> {
     const cliente = await this.clienteRepository.findOne({ where: { id: createVentaDto.cliente } });
